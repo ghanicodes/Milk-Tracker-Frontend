@@ -204,7 +204,7 @@ export default function FarmerListPage() {
               required
             />
             <Input
-              label="Advance Amount (₹)"
+              label="Advance Amount (Rs)"
               type="number"
               placeholder="0"
               value={form.advance}

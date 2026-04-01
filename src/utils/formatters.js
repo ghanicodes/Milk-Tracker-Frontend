@@ -1,3 +1,5 @@
+import { CURRENCY_SYMBOL } from './constants';
+
 export function formatDate(date) {
   if (!date) return '—';
   return new Date(date).toLocaleDateString('en-US', {
@@ -19,8 +21,8 @@ export function formatDateTime(date) {
 }
 
 export function formatCurrency(amount) {
-  if (amount === undefined || amount === null) return '₹0';
-  return `₹${Number(amount).toLocaleString('en-IN')}`;
+  if (amount === undefined || amount === null) return `${CURRENCY_SYMBOL} 0`;
+  return `${CURRENCY_SYMBOL} ${Number(amount).toLocaleString('en-IN')}`;
 }
 
 export function formatQuantity(qty) {

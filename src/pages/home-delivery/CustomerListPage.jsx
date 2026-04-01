@@ -200,7 +200,7 @@ export default function CustomerListPage() {
               options={[{ value: 'cow', label: 'Cow' }, { value: 'buffalo', label: 'Buffalo' }, { value: 'mix', label: 'Mix' }]} required />
             <Input label="Quantity (L/day)" type="number" step="0.5" value={form.quantity}
               onChange={(e) => setForm({ ...form, quantity: e.target.value })} required />
-            <Input label="Price (₹/L)" type="number" value={form.pricePerLiter}
+            <Input label="Price (Rs/L)" type="number" value={form.pricePerLiter}
               onChange={(e) => setForm({ ...form, pricePerLiter: e.target.value })} required />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

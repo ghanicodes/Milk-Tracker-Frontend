@@ -104,7 +104,7 @@ export default function DashboardPage() {
         <StatCard
           icon={TrendingUp}
           title="Outstanding Balance"
-          value={`₹${stats.totalBalance.toLocaleString('en-IN')}`}
+          value={`Rs ${stats.totalBalance.toLocaleString('en-IN')}`}
           subtitle="Pending payments"
           color="amber"
         />
@@ -162,7 +162,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-bold text-slate-900">₹{(customer.balance || 0).toLocaleString('en-IN')}</p>
+                  <p className="text-sm font-bold text-slate-900">Rs {(customer.balance || 0).toLocaleString('en-IN')}</p>
                   <span className={`text-xs font-medium ${customer.isActive ? 'text-emerald-500' : 'text-red-400'}`}>
                     {customer.isActive ? 'Active' : 'Inactive'}
                   </span>

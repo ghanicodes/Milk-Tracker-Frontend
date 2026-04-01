@@ -218,9 +218,9 @@ export default function RetailerListPage() {
           <Select label="Default Milk Type" value={form.defaultMilkType} onChange={(e) => setForm({ ...form, defaultMilkType: e.target.value })}
             options={[{ value: 'Cow', label: 'Cow' }, { value: 'Buffalo', label: 'Buffalo' }]} required />
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Cow Price (₹/L)" type="number" value={form.milkPrices.cow}
+            <Input label="Cow Price (Rs/L)" type="number" value={form.milkPrices.cow}
               onChange={(e) => setForm({ ...form, milkPrices: { ...form.milkPrices, cow: Number(e.target.value) } })} />
-            <Input label="Buffalo Price (₹/L)" type="number" value={form.milkPrices.buffalo}
+            <Input label="Buffalo Price (Rs/L)" type="number" value={form.milkPrices.buffalo}
               onChange={(e) => setForm({ ...form, milkPrices: { ...form.milkPrices, buffalo: Number(e.target.value) } })} />
           </div>
           <div className="flex gap-3 pt-2">

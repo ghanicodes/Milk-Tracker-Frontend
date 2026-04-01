@@ -117,7 +117,7 @@ export default function OpenRateMilkPage() {
               <div className="grid grid-cols-2 gap-4">
                 <Input label="Quantity (Liters)" type="number" step="0.1" placeholder="0.0" value={form.quantity}
                   onChange={(e) => setForm({ ...form, quantity: e.target.value })} required />
-                <Input label="Price / Liter (₹)" type="number" step="0.5" placeholder="0" value={form.pricePerLiter}
+                <Input label="Price / Liter (Rs)" type="number" step="0.5" placeholder="0" value={form.pricePerLiter}
                   onChange={(e) => setForm({ ...form, pricePerLiter: e.target.value })} required />
               </div>
               
@@ -132,7 +132,7 @@ export default function OpenRateMilkPage() {
               {totalAmount > 0 && (
                 <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 text-center">
                   <p className="text-sm text-emerald-600">Total Amount</p>
-                  <p className="text-2xl font-bold text-emerald-700">₹{totalAmount.toLocaleString('en-IN')}</p>
+                  <p className="text-2xl font-bold text-emerald-700">Rs {totalAmount.toLocaleString('en-IN')}</p>
                 </div>
               )}
 
@@ -184,7 +184,7 @@ export default function OpenRateMilkPage() {
                         </td>
                         <td className="p-4 text-right whitespace-nowrap">
                           <div className="font-medium text-slate-900">{record.quantity} L</div>
-                          <div className="text-xs text-slate-500">₹{record.pricePerLiter}/L</div>
+                          <div className="text-xs text-slate-500">Rs {record.pricePerLiter}/L</div>
                         </td>
                         <td className="p-4 text-right whitespace-nowrap">
                           <div className="font-bold text-emerald-600">

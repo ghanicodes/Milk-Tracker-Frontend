@@ -245,7 +245,7 @@ export default function SaleMilkPage() {
                 onChange={(e) => setForm({ ...form, morning: { ...form.morning, quantity: e.target.value } })} />
               <Select label="Milk Type" value={form.morning.milkType}
                 onChange={(e) => setForm({ ...form, morning: { ...form.morning, milkType: e.target.value } })} options={milkTypeOptions} />
-              <Input label="Price (₹/L)" type="number" value={form.morning.pricePerLiter}
+              <Input label="Price (Rs/L)" type="number" value={form.morning.pricePerLiter}
                 onChange={(e) => setForm({ ...form, morning: { ...form.morning, pricePerLiter: e.target.value } })} placeholder="Auto" />
             </div>
           </div>
@@ -257,7 +257,7 @@ export default function SaleMilkPage() {
                 onChange={(e) => setForm({ ...form, evening: { ...form.evening, quantity: e.target.value } })} />
               <Select label="Milk Type" value={form.evening.milkType}
                 onChange={(e) => setForm({ ...form, evening: { ...form.evening, milkType: e.target.value } })} options={milkTypeOptions} />
-              <Input label="Price (₹/L)" type="number" value={form.evening.pricePerLiter}
+              <Input label="Price (Rs/L)" type="number" value={form.evening.pricePerLiter}
                 onChange={(e) => setForm({ ...form, evening: { ...form.evening, pricePerLiter: e.target.value } })} placeholder="Auto" />
             </div>
           </div>

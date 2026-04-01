@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Edit3, Truck, Calendar, Phone, MapPin,
-  Milk, IndianRupee, Plus, CheckCircle2, XCircle, Clock
+  Milk, Banknote, Plus, CheckCircle2, XCircle, Clock
 } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
@@ -152,7 +152,7 @@ export default function CustomerDetailPage() {
         <Card className="p-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
-              <IndianRupee className="w-5 h-5 text-amber-600" />
+              <Banknote className="w-5 h-5 text-amber-600" />
             </div>
             <div>
               <p className="text-xs text-slate-400">Balance Due</p>
@@ -309,7 +309,7 @@ export default function CustomerDetailPage() {
               options={[{ value: 'cow', label: 'Cow' }, { value: 'buffalo', label: 'Buffalo' }, { value: 'mix', label: 'Mix' }]} />
             <Input label="Quantity (L)" type="number" value={editForm.quantity || ''}
               onChange={(e) => setEditForm({ ...editForm, quantity: Number(e.target.value) })} />
-            <Input label="Price (₹/L)" type="number" value={editForm.pricePerLiter || ''}
+            <Input label="Price (Rs/L)" type="number" value={editForm.pricePerLiter || ''}
               onChange={(e) => setEditForm({ ...editForm, pricePerLiter: Number(e.target.value) })} />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
