@@ -21,8 +21,15 @@ export default function CustomerDetailPage() {
   const [customer, setCustomer] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showDeliveryModal, setShowDeliveryModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
+
+  const [paymentForm, setPaymentForm] = useState({
+    amount: '',
+    date: new Date().toISOString().split('T')[0],
+    description: 'Monthly Payment',
+  });
 
   const [deliveryForm, setDeliveryForm] = useState({
     deliveryDate: new Date().toISOString().split('T')[0],
@@ -58,6 +65,23 @@ export default function CustomerDetailPage() {
       toast.success('Delivery logged!');
       setShowDeliveryModal(false);
       setDeliveryForm({ deliveryDate: new Date().toISOString().split('T')[0], status: 'delivered', quantity: '' });
+      loadCustomer();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed');
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handleAddPayment = async (e) => {
+    e.preventDefault();
+    if (!paymentForm.amount) return toast.error('Enter amount');
+    setFormLoading(true);
+    try {
+      await homeDeliveryService.addPayment(id, paymentForm);
+      toast.success('Payment recorded!');
+      setShowPaymentModal(false);
+      setPaymentForm({ amount: '', date: new Date().toISOString().split('T')[0], description: 'Monthly Payment' });
       loadCustomer();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed');
@@ -120,8 +144,9 @@ export default function CustomerDetailPage() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" icon={Edit3} onClick={openEditModal}>Edit</Button>
-          <Button size="sm" icon={Plus} onClick={() => setShowDeliveryModal(true)}>Log Delivery</Button>
+          <Button variant="secondary" size="sm" icon={Edit3} onClick={openEditModal}>Edit</Button>
+          <Button variant="outline" size="sm" icon={Plus} onClick={() => setShowPaymentModal(true)}>Record Payment</Button>
+          <Button size="sm" icon={Truck} onClick={() => setShowDeliveryModal(true)}>Log Delivery</Button>
         </div>
       </div>
 
@@ -323,6 +348,22 @@ export default function CustomerDetailPage() {
           <div className="flex gap-3 pt-2">
             <Button type="button" variant="secondary" onClick={() => setShowEditModal(false)} className="flex-1">Cancel</Button>
             <Button type="submit" loading={formLoading} className="flex-1">Save Changes</Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Record Payment Modal */}
+      <Modal isOpen={showPaymentModal} onClose={() => setShowPaymentModal(false)} title="Record Payment">
+        <form onSubmit={handleAddPayment} className="space-y-4">
+          <Input label="Payment Date" type="date" value={paymentForm.date}
+            onChange={(e) => setPaymentForm({ ...paymentForm, date: e.target.value })} required />
+          <Input label="Amount (Rs)" type="number" placeholder="Enter amount received"
+            value={paymentForm.amount} onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })} required />
+          <Input label="Description" placeholder="e.g. Cash payment, G-Pay"
+            value={paymentForm.description} onChange={(e) => setPaymentForm({ ...paymentForm, description: e.target.value })} />
+          <div className="flex gap-3 pt-2">
+            <Button type="button" variant="secondary" onClick={() => setShowPaymentModal(false)} className="flex-1">Cancel</Button>
+            <Button type="submit" loading={formLoading} className="flex-1">Record Payment</Button>
           </div>
         </form>
       </Modal>

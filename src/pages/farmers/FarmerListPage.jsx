@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, Users, Phone, Banknote, Edit3, Trash2 } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
@@ -19,6 +20,7 @@ export default function FarmerListPage() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingFarmer, setEditingFarmer] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
+  const navigate = useNavigate();
   
   const [form, setForm] = useState({
     name: '',
@@ -166,6 +168,12 @@ export default function FarmerListPage() {
                    </span>
                 )}
               </div>
+              <button
+                onClick={() => navigate(`/milk-collection?farmerId=${farmer._id}`)}
+                className="w-full mt-3 text-xs text-primary-600 font-medium py-2 rounded-lg hover:bg-primary-50 transition-colors"
+              >
+                View Sales →
+              </button>
             </Card>
           ))}
         </div>

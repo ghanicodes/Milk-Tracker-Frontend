@@ -11,6 +11,7 @@ import LoadingSpinner from './components/ui/LoadingSpinner';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import FarmerListPage from './pages/farmers/FarmerListPage';
+import FarmerHistoryPage from './pages/farmers/FarmerHistoryPage';
 import MilkCollectionPage from './pages/milk/MilkCollectionPage';
 import RetailerListPage from './pages/retailers/RetailerListPage';
 import SaleMilkPage from './pages/sales/SaleMilkPage';
@@ -43,6 +44,7 @@ function AppRoutes() {
         
         {/* Farmers & Milk Collection */}
         <Route path="farmers" element={<FarmerListPage />} />
+        <Route path="farmers/:id/history" element={<FarmerHistoryPage />} />
         <Route path="milk-collection" element={<MilkCollectionPage />} />
         
         {/* Retailers & Sales */}

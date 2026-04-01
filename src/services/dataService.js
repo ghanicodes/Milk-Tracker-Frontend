@@ -6,13 +6,16 @@ export const farmerService = {
   getOne: (id) => api.get(`/api/getFarmer/${id}`),
   update: (id, data) => api.put(`/api/updateFarmer/${id}`, data),
   delete: (id) => api.delete(`/api/deleteFarmer/${id}`),
-  getByPhone: (phone) => api.get(`/api/getFarmerByPhone/${phone}`)
+  getByPhone: (phone) => api.get(`/api/getFarmerByPhone/${phone}`),
+  addPayment: (id, data) => api.post(`/api/addFarmerPayment/${id}`, data),
 };
 
 export const milkService = {
   addCollection: (farmerId, data) => api.post(`/api/addMilk/${farmerId}`, data),
   getCollections: (params) => api.get('/api/getMilkCollections', { params }),
   getByFarmer: (farmerId) => api.get(`/api/getMilkCollection/${farmerId}`),
+  getByDate: (farmerId, date) => api.get(`/api/getMilkCollectionByFarmerAndDate/${farmerId}/${date}`),
+  getByDateRange: (farmerId, startDate, endDate) => api.get(`/api/getMilkCollectionByFarmerAndDateRange/${farmerId}/${startDate}/${endDate}`),
   updateCollection: (id, data) => api.put(`/api/updateMilkCollection/${id}`, data),
   deleteCollection: (id) => api.delete(`/api/deleteMilkCollection/${id}`),
 };
@@ -49,5 +52,6 @@ export const homeDeliveryService = {
   update: (id, data) => api.put(`/api/updateHomeDelivery/${id}`, data),
   delete: (id) => api.delete(`/api/deleteHomeDelivery/${id}`),
   addDelivery: (customerId, data) => api.post(`/api/addDelivery/${customerId}`, data),
+  addPayment: (customerId, data) => api.post(`/api/addPayment/${customerId}`, data),
   getMyDelivery: () => api.get('/api/myDelivery'),
 };
