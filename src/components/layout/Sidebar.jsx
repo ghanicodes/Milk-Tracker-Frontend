@@ -11,12 +11,14 @@ import {
   ChevronLeft,
   ChevronRight,
   Droplets,
+  ClipboardList,
 } from 'lucide-react';
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/farmers', label: 'Farmers', icon: Users },
   { path: '/milk-collection', label: 'Milk Collection', icon: Milk },
+  { path: '/farmer-milk-history', label: 'Farmer Milk History', icon: ClipboardList },
   { path: '/retailers', label: 'Retailers', icon: Store },
   { path: '/sales', label: 'Sale Milk', icon: ShoppingCart },
   { path: '/open-rate', label: 'Open Rate Milk', icon: TrendingUp },
@@ -51,8 +53,8 @@ export default function Sidebar({ isOpen, onToggle }) {
             </div>
             {isOpen && (
               <div className="animate-fade-in">
-                <h1 className="text-lg font-bold">Milk Tracker</h1>
-                <p className="text-[10px] text-slate-400 uppercase tracking-wider">Management</p>
+                <h1 className="text-lg font-bold">Abdul Raheem</h1>
+                <p className="text-[10px] text-slate-400 uppercase tracking-wider">Your Daily Milk Records</p>
               </div>
             )}
           </div>

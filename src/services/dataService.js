@@ -13,9 +13,12 @@ export const farmerService = {
 export const milkService = {
   addCollection: (farmerId, data) => api.post(`/api/addMilk/${farmerId}`, data),
   getCollections: (params) => api.get('/api/getMilkCollections', { params }),
+  getAllCollections: () => api.get('/api/getMilkCollections'),
   getByFarmer: (farmerId) => api.get(`/api/getMilkCollection/${farmerId}`),
   getByDate: (farmerId, date) => api.get(`/api/getMilkCollectionByFarmerAndDate/${farmerId}/${date}`),
   getByDateRange: (farmerId, startDate, endDate) => api.get(`/api/getMilkCollectionByFarmerAndDateRange/${farmerId}/${startDate}/${endDate}`),
+  getAllByDate: (date) => api.get(`/api/getMilkCollectionByDate/${date}`),
+  getAllByDateRange: (startDate, endDate) => api.get(`/api/getMilkCollectionByDateRange/${startDate}/${endDate}`),
   updateCollection: (id, data) => api.put(`/api/updateMilkCollection/${id}`, data),
   deleteCollection: (id) => api.delete(`/api/deleteMilkCollection/${id}`),
 };
@@ -26,6 +29,9 @@ export const retailerService = {
   getOne: (id) => api.get(`/api/getSingleRetailer/${id}`),
   update: (id, data) => api.put(`/api/updateRetailer/${id}`, data),
   delete: (id) => api.delete(`/api/deleteRetailer/${id}`),
+  addPayment: (id, data) => api.post(`/api/addRetailerPayment/${id}`, data),
+  setDailyPayment: (id, data) => api.post(`/api/setDailyRetailerPayment/${id}`, data),
+  resetAll: () => api.post('/api/resetAllBalances'),
 };
 
 export const saleMilkService = {

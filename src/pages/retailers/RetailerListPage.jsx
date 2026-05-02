@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Store, Search, Phone, MapPin, Trash2, Edit3 } from 'lucide-react';
+import { Plus, Store, Search, Phone, MapPin, Trash2, Edit3, ShieldAlert, RotateCcw } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
@@ -22,6 +22,8 @@ export default function RetailerListPage() {
   const [formLoading, setFormLoading] = useState(false);
   const [editingRetailer, setEditingRetailer] = useState(null);
   const [search, setSearch] = useState('');
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
   const navigate = useNavigate();
   const [form, setForm] = useState({
     name: '', phone: '', address: '', defaultMilkType: '',
@@ -98,10 +100,24 @@ export default function RetailerListPage() {
     }
   };
 
+  const handleResetAll = async () => {
+    setResetLoading(true);
+    try {
+      await retailerService.resetAll();
+      toast.success('All balances reset to zero!');
+      setShowResetModal(false);
+      loadRetailers();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Reset failed');
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
   const filteredRetailers = retailers.filter(
     (r) => r.name?.toLowerCase().includes(search.toLowerCase()) ||
-           r.phone?.includes(search) ||
-           r.address?.toLowerCase().includes(search.toLowerCase())
+      r.phone?.includes(search) ||
+      r.address?.toLowerCase().includes(search.toLowerCase())
   );
 
   if (loading) return <LoadingSpinner />;
@@ -113,7 +129,12 @@ export default function RetailerListPage() {
           <h2 className="text-2xl font-bold text-slate-900">Retailers</h2>
           <p className="text-sm text-slate-500">{retailers.length} retailer(s) registered</p>
         </div>
-        <Button icon={Plus} onClick={openAddModal}>Add Retailer</Button>
+        <div className="flex gap-2">
+          <Button variant="outline" icon={RotateCcw} onClick={() => setShowResetModal(true)} className="text-rose-600 hover:bg-rose-50 border-rose-100">
+            Reset All Balances
+          </Button>
+          <Button icon={Plus} onClick={openAddModal}>Add Retailer</Button>
+        </div>
       </div>
 
       {/* Search */}
@@ -197,11 +218,10 @@ export default function RetailerListPage() {
             <button
               key={i}
               onClick={() => setPage(i + 1)}
-              className={`w-9 h-9 rounded-xl text-sm font-medium transition-all ${
-                page === i + 1
+              className={`w-9 h-9 rounded-xl text-sm font-medium transition-all ${page === i + 1
                   ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/25'
                   : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-              }`}
+                }`}
             >
               {i + 1}
             </button>
@@ -228,6 +248,40 @@ export default function RetailerListPage() {
             <Button type="submit" loading={formLoading} className="flex-1">{editingRetailer ? 'Update' : 'Add'} Retailer</Button>
           </div>
         </form>
+      </Modal>
+
+      {/* Reset Confirmation Modal */}
+      <Modal isOpen={showResetModal} onClose={() => setShowResetModal(false)} title="Reset All Balances">
+        <div className="space-y-6 py-2">
+          <div className="flex items-center gap-4 p-4 bg-rose-50 rounded-2xl border border-rose-100">
+            <div className="w-12 h-12 rounded-xl bg-rose-500 flex items-center justify-center text-white flex-shrink-0 animate-pulse">
+              <ShieldAlert className="w-7 h-7" />
+            </div>
+            <div>
+              <h4 className="font-bold text-rose-900">Extreme Caution Required</h4>
+              <p className="text-xs text-rose-700 leading-relaxed mt-1">
+                This action will permanently delete <strong>all transaction history</strong> and set every retailer's balance to <strong>zero</strong>. This cannot be undone.
+              </p>
+            </div>
+          </div>
+ 
+          <div className="space-y-3">
+            <p className="text-sm text-slate-600 font-medium">Are you absolutely sure you want to proceed?</p>
+            <div className="flex gap-3">
+              <Button type="button" variant="secondary" onClick={() => setShowResetModal(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button 
+                type="button" 
+                onClick={handleResetAll} 
+                loading={resetLoading} 
+                className="flex-1 bg-rose-600 hover:bg-rose-700 shadow-lg shadow-rose-200"
+              >
+                Yes, Reset All
+              </Button>
+            </div>
+          </div>
+        </div>
       </Modal>
     </div>
   );

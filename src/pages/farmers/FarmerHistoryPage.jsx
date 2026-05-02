@@ -8,6 +8,7 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
 import Card from '../../components/ui/Card';
+import Modal from '../../components/ui/Modal';
 import Badge from '../../components/ui/Badge';
 import EmptyState from '../../components/ui/EmptyState';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
@@ -22,6 +23,7 @@ export default function FarmerHistoryPage() {
   const [farmer, setFarmer] = useState(null);
   const [collections, setCollections] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [filterMode, setFilterMode] = useState('all');
   const [filterDate, setFilterDate] = useState('');
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
@@ -33,16 +35,33 @@ export default function FarmerHistoryPage() {
     description: 'Advance Payment'
   });
 
-  useEffect(() => {
-    loadData();
-  }, [id, filterMode, filterDate, dateRange.start, dateRange.end]);
-
-  const loadData = async () => {
+  const fetchFarmer = async () => {
     try {
       setLoading(true);
-      const farmerRes = await farmerService.getOne(id);
-      setFarmer(farmerRes.data.farmer);
+      const res = await farmerService.getOne(id);
+      setFarmer(res.data.farmer);
+    } catch (err) {
+      toast.error('Farmer not found');
+      navigate('/farmers');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // Initial load: Fetch Farmer profile once
+  useEffect(() => {
+    fetchFarmer();
+  }, [id, navigate]);
+
+  // Filter updates: Fetch collections when filters change
+  useEffect(() => {
+    if (farmer) loadCollections();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, filterMode, filterDate, dateRange.start, dateRange.end, !!farmer]);
+
+  const loadCollections = async () => {
+    try {
+      setIsUpdating(true);
       let collectionRes;
       if (filterMode === 'date' && filterDate) {
         collectionRes = await milkService.getByDate(id, filterDate);
@@ -51,17 +70,16 @@ export default function FarmerHistoryPage() {
       } else if (filterMode === 'all') {
         collectionRes = await milkService.getByFarmer(id);
       } else {
-        // Mode selected but params missing
         setCollections([]);
-        setLoading(false);
+        setIsUpdating(false);
         return;
       }
       
       setCollections(collectionRes.data.milkRecords || []);
     } catch (err) {
-      toast.error('Failed to load history');
+      toast.error('Failed to update records');
     } finally {
-      setLoading(false);
+      setIsUpdating(false);
     }
   };
 
@@ -72,7 +90,273 @@ export default function FarmerHistoryPage() {
   };
 
   const handlePrint = () => {
-    window.print();
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    if (!printWindow) {
+      toast.error('Please allow popups to print the collection slip.');
+      return;
+    }
+
+    const slipHTML = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <title>Collection Slip - ${farmer?.name || 'Farmer'}</title>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            color: #1e293b;
+            background: #fff;
+            padding: 2rem;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          .slip-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 3px solid #1e293b;
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+          }
+          .slip-header h1 {
+            font-size: 1.6rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+            color: #0f172a;
+          }
+          .slip-header .subtitle {
+            font-size: 0.85rem;
+            color: #64748b;
+            font-weight: 500;
+            margin-top: 2px;
+          }
+          .slip-header .brand {
+            text-align: right;
+          }
+          .slip-header .brand h2 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #0f172a;
+          }
+          .slip-header .brand .date {
+            font-size: 0.8rem;
+            color: #64748b;
+          }
+          .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 2.5rem;
+          }
+          .details-grid .section-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+          }
+          .details-grid .name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #0f172a;
+          }
+          .details-grid .info {
+            font-size: 0.85rem;
+            color: #64748b;
+            font-weight: 500;
+            margin-top: 2px;
+          }
+          .details-grid .info strong {
+            color: #334155;
+            font-weight: 700;
+          }
+          .details-grid .right {
+            text-align: right;
+          }
+          .details-grid .context-value {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #334155;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2.5rem;
+          }
+          thead tr {
+            border-top: 2px solid #0f172a;
+            border-bottom: 2px solid #0f172a;
+          }
+          th {
+            text-align: left;
+            padding: 0.75rem 0.5rem;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #0f172a;
+          }
+          th:last-child {
+            text-align: right;
+          }
+          td {
+            padding: 0.7rem 0.5rem;
+            font-size: 0.85rem;
+            color: #334155;
+            border-bottom: 1px solid #e2e8f0;
+          }
+          td:first-child {
+            font-weight: 700;
+          }
+          td:last-child {
+            text-align: right;
+            font-weight: 800;
+          }
+          tfoot td {
+            border-top: 2px solid #0f172a;
+            border-bottom: none;
+            padding-top: 1rem;
+            font-weight: 800;
+          }
+          .grand-total-label {
+            text-align: right !important;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.8rem;
+          }
+          .grand-total-value {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: #0f172a;
+          }
+          .signatures {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6rem;
+            margin-top: 5rem;
+            padding-top: 2.5rem;
+          }
+          .sig-box {
+            border-top: 1px solid #cbd5e1;
+            padding-top: 0.75rem;
+          }
+          .sig-box.right {
+            text-align: right;
+          }
+          .sig-box .sig-label {
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 0.25rem;
+          }
+          .sig-box .sig-text {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #64748b;
+          }
+          .footer {
+            margin-top: 5rem;
+            text-align: center;
+            font-size: 0.6rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+          }
+          @media print {
+            body { padding: 1cm; }
+            @page { margin: 1cm; size: auto; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="slip-header">
+          <div>
+            <h1>Milk Collection Slip</h1>
+            <p class="subtitle">Official Supplier Record</p>
+          </div>
+          <div class="brand">
+            <h2>Milk Tracker Pro</h2>
+            <p class="date">${formatDate(new Date())}</p>
+          </div>
+        </div>
+
+        <div class="details-grid">
+          <div>
+            <p class="section-label">Farmer Details</p>
+            <p class="name">${farmer?.name || '—'}</p>
+            <p class="info">${farmer?.phone || '—'}</p>
+            <p class="info">Default Type: <strong>${farmer?.defaultMilkType || '—'}</strong></p>
+          </div>
+          <div class="right">
+            <p class="section-label">Report Context</p>
+            <p class="context-value">${filterMode === 'all' ? 'All Records' : filterMode === 'date' ? 'Date: ' + formatDate(filterDate) : 'Range: ' + formatDate(dateRange.start) + ' – ' + formatDate(dateRange.end)}</p>
+            <p class="info" style="margin-top: 4px;">Total Entries: <strong>${stats.count}</strong></p>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Morning (L)</th>
+              <th>Evening (L)</th>
+              <th>Total Day</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${collections.map(col => {
+              const dayTotal = (col.morning?.amount || 0) + (col.evening?.amount || 0);
+              return `
+                <tr>
+                  <td>${formatDate(col.date)}</td>
+                  <td>${col.morning?.amount > 0 ? formatQuantity(col.morning.amount) + ' (' + col.morning.milkType + ')' : '—'}</td>
+                  <td>${col.evening?.amount > 0 ? formatQuantity(col.evening.amount) + ' (' + col.evening.milkType + ')' : '—'}</td>
+                  <td>${formatQuantity(dayTotal)}</td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" class="grand-total-label">Grand Total Supply</td>
+              <td class="grand-total-value">${formatQuantity(stats.totalLiters)}</td>
+            </tr>
+          </tfoot>
+        </table>
+
+        <div class="signatures">
+          <div class="sig-box">
+            <p class="sig-label">Checked By</p>
+            <p class="sig-text">Authorized Signature</p>
+          </div>
+          <div class="sig-box right">
+            <p class="sig-label">Farmer Acknowledgment</p>
+            <p class="sig-text">Signature / Stamp</p>
+          </div>
+        </div>
+
+        <p class="footer">Generated via Milk Tracker Pro &bull; ${new Date().getFullYear()}</p>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(slipHTML);
+    printWindow.document.close();
+
+    // Wait for fonts to load, then print
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 400);
+    };
   };
 
   const handlePaymentSubmit = async (e) => {
@@ -92,7 +376,8 @@ export default function FarmerHistoryPage() {
         date: new Date().toISOString().split('T')[0],
         description: 'Advance Payment'
       });
-      loadData();
+      fetchFarmer();
+      loadCollections();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to record payment');
     } finally {
@@ -101,6 +386,12 @@ export default function FarmerHistoryPage() {
   };
 
   if (loading && !farmer) return <LoadingSpinner fullPage />;
+  if (!farmer) return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+      <p className="text-slate-500 font-medium">Farmer data not found.</p>
+      <Button onClick={() => navigate('/farmers')}>Back to Farmers</Button>
+    </div>
+  );
 
   const stats = {
     totalLiters: collections.reduce((acc, col) => acc + (col.morning?.amount || 0) + (col.evening?.amount || 0), 0),
@@ -109,37 +400,37 @@ export default function FarmerHistoryPage() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in print:p-0">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 print:hidden">
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={() => navigate(-1)}
-            className="p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-500"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <div>
-            <h2 className="text-2xl font-bold text-slate-900">Collection History</h2>
-            <div className="flex items-center gap-2 text-sm text-slate-500">
-              <span>Farmers</span>
-              <ChevronRight className="w-4 h-4" />
-              <span>{farmer?.name}</span>
+    <div className="space-y-6 animate-fade-in">
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => navigate(-1)}
+              className="p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-500"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900">Collection History</h2>
+              <div className="flex items-center gap-2 text-sm text-slate-500">
+                <span>Farmers</span>
+                <ChevronRight className="w-4 h-4" />
+                <span>{farmer?.name}</span>
+              </div>
             </div>
           </div>
+          <div className="flex gap-2">
+            <Button variant="outline" icon={Plus} onClick={() => setShowPaymentModal(true)}>Record Payment</Button>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" icon={Plus} onClick={() => setShowPaymentModal(true)}>Record Payment</Button>
-          <Button variant="secondary" icon={Printer} onClick={handlePrint}>Print Report</Button>
-        </div>
-      </div>
 
       {/* Farmer Profile & Quick Stats */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         <Card className="p-5 lg:col-span-2">
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 rounded-2xl bg-primary-100 flex items-center justify-center text-2xl font-bold text-primary-700">
-              {farmer?.name?.charAt(0).toUpperCase()}
+              {farmer?.name?.charAt(0)?.toUpperCase()}
             </div>
             <div>
               <h3 className="text-xl font-bold text-slate-900">{farmer?.name}</h3>
@@ -182,7 +473,7 @@ export default function FarmerHistoryPage() {
       </div>
 
       {/* Filters */}
-      <Card className="p-4 print:hidden">
+      <Card className="p-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
           <Select
             label="Filter View"
@@ -226,62 +517,71 @@ export default function FarmerHistoryPage() {
           </div>
         </div>
       </Card>
-      {/* History Table */}
-      {collections.length === 0 ? (
-        <EmptyState 
-          icon={Calendar} 
-          title="No records found" 
-          description="Try adjusting your filters or record some collections first." 
-        />
-      ) : (
-        <Card className="overflow-hidden border-slate-100 shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-semibold">
-                <tr>
-                  <th className="text-left p-4">Date</th>
-                  <th className="text-left p-4">Morning (L)</th>
-                  <th className="text-left p-4">Evening (L)</th>
-                  <th className="text-left p-4">Total Day</th>
-                  <th className="text-left p-4">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {collections.map((col) => {
-                  const dayTotal = (col.morning?.amount || 0) + (col.evening?.amount || 0);
-                  return (
-                    <tr key={col._id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="p-4 font-semibold text-slate-700">{formatDate(col.date)}</td>
-                      <td className="p-4">
-                        {col.morning?.amount > 0 ? (
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-slate-900">{formatQuantity(col.morning.amount)}</span>
-                            <span className="text-[10px] bg-sky-50 text-sky-600 px-1.5 py-0.5 rounded border border-sky-100">{col.morning.milkType}</span>
-                          </div>
-                        ) : <span className="text-slate-300">—</span>}
-                      </td>
-                      <td className="p-4">
-                        {col.evening?.amount > 0 ? (
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-slate-900">{formatQuantity(col.evening.amount)}</span>
-                            <span className="text-[10px] bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded border border-indigo-100">{col.evening.milkType}</span>
-                          </div>
-                        ) : <span className="text-slate-300">—</span>}
-                      </td>
-                      <td className="p-4">
-                        <span className="text-lg font-bold text-primary-600">{formatQuantity(dayTotal)}</span>
-                      </td>
-                      <td className="p-4">
-                        <Badge color="success" variant="flat">Recorded</Badge>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+      <div className={`transition-opacity duration-200 ${isUpdating ? 'opacity-50' : 'opacity-100'}`}>
+        {collections.length === 0 ? (
+          <EmptyState 
+            icon={Calendar} 
+            title="No records found" 
+            description="Try adjusting your filters or record some collections first." 
+          />
+        ) : (
+          <>
+            <Card className="overflow-hidden border-slate-100 shadow-sm relative">
+               {isUpdating && <div className="absolute top-0 left-0 w-full h-1 bg-primary-500/30 overflow-hidden"><div className="w-1/3 h-full bg-primary-600 animate-loading-bar"></div></div>}
+              <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-semibold">
+                  <tr>
+                    <th className="text-left p-4">Date</th>
+                    <th className="text-left p-4">Morning (L)</th>
+                    <th className="text-left p-4">Evening (L)</th>
+                    <th className="text-left p-4">Total Day</th>
+                    <th className="text-left p-4">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {collections.map((col) => {
+                    const dayTotal = (col.morning?.amount || 0) + (col.evening?.amount || 0);
+                    return (
+                      <tr key={col._id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="p-4 font-semibold text-slate-700">{formatDate(col.date)}</td>
+                        <td className="p-4">
+                          {col.morning?.amount > 0 ? (
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-slate-900">{formatQuantity(col.morning.amount)}</span>
+                              <span className="text-[10px] bg-sky-50 text-sky-600 px-1.5 py-0.5 rounded border border-sky-100">{col.morning.milkType}</span>
+                            </div>
+                          ) : <span className="text-slate-300">—</span>}
+                        </td>
+                        <td className="p-4">
+                          {col.evening?.amount > 0 ? (
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-slate-900">{formatQuantity(col.evening.amount)}</span>
+                              <span className="text-[10px] bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded border border-indigo-100">{col.evening.milkType}</span>
+                            </div>
+                          ) : <span className="text-slate-300">—</span>}
+                        </td>
+                        <td className="p-4">
+                          <span className="text-lg font-bold text-primary-600">{formatQuantity(dayTotal)}</span>
+                        </td>
+                        <td className="p-4">
+                          <Badge color="success" variant="flat">Recorded</Badge>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+          <div className="flex justify-end mt-4">
+            <Button variant="secondary" icon={Printer} onClick={handlePrint}>Print Collection Slip</Button>
           </div>
-        </Card>
-      )}
+          </>
+        )}
+      </div>
+
+      {/* Printable slip will be moved to the end of the component */}
 
       {/* Ledger Section */}
       <Card className="overflow-hidden border-slate-100 shadow-sm mt-8">
@@ -306,7 +606,7 @@ export default function FarmerHistoryPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {[...(farmer.ledger || [])].reverse().map((entry, idx) => (
+                {[...(farmer?.ledger || [])].reverse().map((entry, idx) => (
                   <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
                     <td className="p-4 text-slate-600">{formatDate(entry.date)}</td>
                     <td className="p-4 font-medium text-slate-900">{entry.description}</td>
@@ -373,6 +673,7 @@ export default function FarmerHistoryPage() {
           </div>
         </form>
       </Modal>
+      </div>
     </div>
   );
 }
