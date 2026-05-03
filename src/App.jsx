@@ -8,6 +8,7 @@ import UserLayout from './components/layout/UserLayout';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 
 // Pages
+import LandingPage from './pages/landing/LandingPage';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import FarmerListPage from './pages/farmers/FarmerListPage';
@@ -29,7 +30,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
   if (allowedRoles && user && !allowedRoles.includes(user.role)) {
-    return <Navigate to={user.role === 'admin' ? '/' : '/user-dashboard'} replace />;
+    return <Navigate to={user.role === 'admin' ? '/admin' : '/user-dashboard'} replace />;
   }
   
   return children;
@@ -38,9 +39,13 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 function AppRoutes() {
   return (
     <Routes>
+      {/* Public Landing Page — default route */}
+      <Route path="/" element={<LandingPage />} />
+
       <Route path="/login" element={<LoginPage />} />
       
-      <Route path="/" element={<ProtectedRoute allowedRoles={['admin']}><Layout /></ProtectedRoute>}>
+      {/* Admin Routes */}
+      <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><Layout /></ProtectedRoute>}>
         <Route index element={<DashboardPage />} />
         
         {/* Farmers & Milk Collection */}

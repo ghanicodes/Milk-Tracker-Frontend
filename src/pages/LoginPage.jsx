@@ -23,7 +23,7 @@ export default function LoginPage() {
       const result = await login(phoneOrEmail, password);
       if (result.success) {
         toast.success('Welcome back!');
-        navigate(result.user?.role === 'admin' ? '/' : '/user-dashboard');
+        navigate(result.user?.role === 'admin' ? '/admin' : '/user-dashboard');
       } else {
         toast.error(result.message || 'Invalid credentials');
       }

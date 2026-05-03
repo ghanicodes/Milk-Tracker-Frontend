@@ -15,14 +15,14 @@ import {
 } from 'lucide-react';
 
 const navItems = [
-  { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/farmers', label: 'Farmers', icon: Users },
-  { path: '/milk-collection', label: 'Milk Collection', icon: Milk },
-  { path: '/farmer-milk-history', label: 'Farmer Milk History', icon: ClipboardList },
-  { path: '/retailers', label: 'Retailers', icon: Store },
-  { path: '/sales', label: 'Sale Milk', icon: ShoppingCart },
-  { path: '/open-rate', label: 'Open Rate Milk', icon: TrendingUp },
-  { path: '/home-delivery', label: 'Home Delivery', icon: Truck },
+  { path: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { path: '/admin/farmers', label: 'Farmers', icon: Users },
+  { path: '/admin/milk-collection', label: 'Milk Collection', icon: Milk },
+  { path: '/admin/farmer-milk-history', label: 'Farmer Milk History', icon: ClipboardList },
+  { path: '/admin/retailers', label: 'Retailers', icon: Store },
+  { path: '/admin/sales', label: 'Sale Milk', icon: ShoppingCart },
+  { path: '/admin/open-rate', label: 'Open Rate Milk', icon: TrendingUp },
+  { path: '/admin/home-delivery', label: 'Home Delivery', icon: Truck },
 ];
 
 export default function Sidebar({ isOpen, onToggle }) {
@@ -65,7 +65,7 @@ export default function Sidebar({ isOpen, onToggle }) {
               <NavLink
                 key={item.path}
                 to={item.path}
-                end={item.path === '/'}
+                end={item.path === '/admin'}
                 className={({ isActive }) => `
                   flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
                   transition-all duration-200 group relative
